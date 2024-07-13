@@ -1,41 +1,49 @@
-const express = require('express')
-const app = express()
-const bcrypt = require('bcrypt')
+const express = require('express');
+const app = express();
+const bcrypt = require('bcrypt');
 
-app.use(express.json())
+app.use(express.json());
 
-const users = []
+const users = [];
 
 app.get('/users', (req, res) => {
-  res.json(users)
-})
+  res.json(users);
+});
 
-//this will allow users to create a user
+// This will allow users to create a user
 app.post('/users', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    const user = { name: req.body.name, password: hashedPassword }
-    users.push(user)
-    res.status(201).send()
-  } catch {
-    res.status(500).send()
+    console.log("Request body:", req.body); // Log the request body
+    if (!req.body.name || !req.body.password) {
+      return res.status(400).send('Name and password are required');
+    }
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const user = { name: req.body.name, password: hashedPassword };
+    users.push(user);
+    res.status(201).send();
+  } catch (error) {
+    console.error("Error during user creation:", error); // Log the error
+    res.status(500).send('Server error');
   }
-})
+});
 
 app.post('/users/login', async (req, res) => {
-  const user = users.find(user => user.name === req.body.name)
+  const user = users.find(user => user.name === req.body.name);
   if (user == null) {
-    return res.status(400).send('Cannot find user')
+    return res.status(400).send('Cannot find user');
   }
   try {
-    if(await bcrypt.compare(req.body.password, user.password)) {
-      res.send('Success')
+    if (await bcrypt.compare(req.body.password, user.password)) {
+      res.send('Success');
     } else {
-      res.send('Not Allowed')
+      res.send('Not Allowed');
     }
-  } catch {
-    res.status(500).send()
+  } catch (error) {
+    console.error("Error during login:", error); // Log the error
+    res.status(500).send('Server error');
   }
-})
+});
 
-app.listen(3000)
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
