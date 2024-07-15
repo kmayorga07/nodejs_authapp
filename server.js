@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+const path = require('path');
 
 app.use(express.json());
 
@@ -8,6 +9,11 @@ const users = [];
 
 app.get('/users', (req, res) => {
   res.json(users);
+});
+
+// Serve the HTML file
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // This will allow users to create a user
